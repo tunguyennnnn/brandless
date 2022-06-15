@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"web-server/graph"
 	"web-server/graph/generated"
+	graph "web-server/graph/resolvers"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"

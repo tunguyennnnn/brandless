@@ -1,0 +1,8 @@
+{
+  "name": "brandless",
+  "scripts": {
+    "containers": "docker-compose -f dev/docker-compose.yml up",
+    "containers:down": "docker-compose -f dev/docker-compose.yml down",
+    "web-app": "cd web-app && npm start"
+  }
+}

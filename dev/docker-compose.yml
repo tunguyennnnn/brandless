@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  webserver:
+    build:
+      context: ../
+      dockerfile: ./dev/Dockerfile.webserver
+    ports:
+      - "4000:4000"
+    volumes:
+      - ../web-server:/project/app
+    restart: on-failure

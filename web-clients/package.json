@@ -1,0 +1,19 @@
+{
+  "name": "web-clients",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "lerna run --parallel start",
+    "clean": "npx lerna clean -y"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.3",
+    "lerna": "^5.1.4",
+    "typescript": "^4.7.3"
+  }
+}

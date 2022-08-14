@@ -1,7 +1,13 @@
 version: '3.8'
 
+
+networks:
+  webnetwork:
+
 services:
   webserver:
+    networks:
+      - webnetwork
     build:
       context: ../
       dockerfile: ./dev/Dockerfile.webserver
@@ -10,3 +16,18 @@ services:
     volumes:
       - ../web-server:/project/app
     restart: on-failure
+  db:
+    networks:
+      - webnetwork
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

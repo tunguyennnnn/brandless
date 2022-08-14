@@ -3,39 +3,20 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"web-server/graph/generated"
 	graph "web-server/graph/resolvers"
+	"web-server/libs"
+	"web-server/models"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/joho/godotenv"
 )
 
 const defaultPort = "4000"
 
-func getEnv(key string, fallback ...string) string {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	value := os.Getenv(key)
-
-	if value != "" {
-		return value
-	}
-
-	if len(fallback) == 0 {
-		log.Fatalf("%d does not exist", key)
-	}
-
-	return fallback[0]
-}
-
 func main() {
-	port := getEnv("PORT", defaultPort)
+	models.ConnectDB()
+	port := libs.GetEnv("PORT", defaultPort)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 

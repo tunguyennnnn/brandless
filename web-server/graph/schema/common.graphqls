@@ -1,10 +1,13 @@
-type Product {
-  id: ID!
-  productId: String!
-  name: String!
-}
+scalar Cursor
+scalar Date
 
 type Query {
   health: String!
-  products: [Product!]!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: Cursor
+  endCursor: Cursor
 }

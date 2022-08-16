@@ -3,7 +3,10 @@
   "scripts": {
     "containers": "docker-compose -f dev/docker-compose.yml up",
     "containers:down": "docker-compose -f dev/docker-compose.yml down",
-    "web-app": "cd web-app && npm start"
+    "web-app": "cd web-app && npm start",
+    "migration:init": "docker exec -ti brandless-web-backend \"./server\" \"init\"",
+    "migration:up": "docker exec -ti brandless-web-backend \"./server\" \"up\"",
+    "migration:down": "docker exec -ti brandless-web-backend \"./server\" \"down\""
   },
   "dependencies": {
     "prettier": "^2.7.1"

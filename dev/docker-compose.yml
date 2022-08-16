@@ -8,6 +8,7 @@ services:
   webserver:
     networks:
       - webnetwork
+    container_name: brandless-web-backend
     build:
       context: ../
       dockerfile: ./dev/Dockerfile.webserver

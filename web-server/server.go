@@ -14,8 +14,7 @@ import (
 
 const defaultPort = "4000"
 
-func main() {
-	models.ConnectDB()
+func runWebServer() {
 	port := libs.GetEnv("PORT", defaultPort)
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
@@ -25,4 +24,9 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func main() {
+	models.ConnectDB()
+	runWebServer()
 }

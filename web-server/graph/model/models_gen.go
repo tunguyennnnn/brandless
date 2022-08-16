@@ -2,8 +2,26 @@
 
 package model
 
+type PageInfo struct {
+	HasNextPage     bool    `json:"hasNextPage"`
+	HasPreviousPage bool    `json:"hasPreviousPage"`
+	StartCursor     *string `json:"startCursor"`
+	EndCursor       *string `json:"endCursor"`
+}
+
 type Product struct {
 	ID        string `json:"id"`
 	ProductID string `json:"productId"`
 	Name      string `json:"name"`
+}
+
+type ProductConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*ProductEdge `json:"edges"`
+}
+
+type ProductEdge struct {
+	Node   *Product `json:"node"`
+	Cursor string   `json:"cursor"`
 }

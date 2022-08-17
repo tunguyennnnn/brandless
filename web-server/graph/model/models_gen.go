@@ -2,6 +2,18 @@
 
 package model
 
+type Connection interface {
+	IsConnection()
+}
+
+type Edge interface {
+	IsEdge()
+}
+
+type Node interface {
+	IsNode()
+}
+
 type PageInfo struct {
 	HasNextPage     bool    `json:"hasNextPage"`
 	HasPreviousPage bool    `json:"hasPreviousPage"`
@@ -15,13 +27,19 @@ type Product struct {
 	Name      string `json:"name"`
 }
 
+func (Product) IsNode() {}
+
 type ProductConnection struct {
 	TotalCount int            `json:"totalCount"`
 	PageInfo   *PageInfo      `json:"pageInfo"`
 	Edges      []*ProductEdge `json:"edges"`
 }
 
+func (ProductConnection) IsConnection() {}
+
 type ProductEdge struct {
 	Node   *Product `json:"node"`
 	Cursor string   `json:"cursor"`
 }
+
+func (ProductEdge) IsEdge() {}

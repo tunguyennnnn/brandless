@@ -69,13 +69,13 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Health   func(childComplexity int) int
-		Products func(childComplexity int, limit *int) int
+		Products func(childComplexity int, limit *int, cursor *string) int
 	}
 }
 
 type QueryResolver interface {
 	Health(ctx context.Context) (string, error)
-	Products(ctx context.Context, limit *int) (*model.ProductConnection, error)
+	Products(ctx context.Context, limit *int, cursor *string) (*model.ProductConnection, error)
 }
 
 type executableSchema struct {
@@ -194,7 +194,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Products(childComplexity, args["limit"].(*int)), true
+		return e.complexity.Query.Products(childComplexity, args["limit"].(*int), args["cursor"].(*string)), true
 
 	}
 	return 0, false
@@ -249,9 +249,25 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../schema/common.graphqls", Input: `scalar Cursor
+scalar Date
 
 type Query {
   health: String!
+}
+
+interface Node {
+  id: ID!
+}
+
+interface Edge {
+  node: Node
+  cursor: Cursor!
+}
+
+interface Connection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [Edge]
 }
 
 type PageInfo {
@@ -261,25 +277,25 @@ type PageInfo {
   endCursor: Cursor
 }
 `, BuiltIn: false},
-	{Name: "../schema/products.graphqls", Input: `type Product {
+	{Name: "../schema/products.graphqls", Input: `type Product implements Node {
   id: ID!
   productId: String!
   name: String!
 }
 
-type ProductConnection {
+type ProductConnection implements Connection {
   totalCount: Int!
   pageInfo: PageInfo!
   edges: [ProductEdge]
 }
 
-type ProductEdge {
+type ProductEdge implements Edge {
   node: Product
   cursor: Cursor!
 }
 
 extend type Query {
-  products(limit: Int): ProductConnection!
+  products(limit: Int, cursor: Date): ProductConnection!
 }
 `, BuiltIn: false},
 }
@@ -316,6 +332,15 @@ func (ec *executionContext) field_Query_products_args(ctx context.Context, rawAr
 		}
 	}
 	args["limit"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["cursor"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cursor"))
+		arg1, err = ec.unmarshalODate2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["cursor"] = arg1
 	return args, nil
 }
 
@@ -955,7 +980,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx, fc.Args["limit"].(*int))
+		return ec.resolvers.Query().Products(rctx, fc.Args["limit"].(*int), fc.Args["cursor"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2910,6 +2935,54 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Connection(ctx context.Context, sel ast.SelectionSet, obj model.Connection) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.ProductConnection:
+		return ec._ProductConnection(ctx, sel, &obj)
+	case *model.ProductConnection:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ProductConnection(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _Edge(ctx context.Context, sel ast.SelectionSet, obj model.Edge) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.ProductEdge:
+		return ec._ProductEdge(ctx, sel, &obj)
+	case *model.ProductEdge:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ProductEdge(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj model.Node) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Product:
+		return ec._Product(ctx, sel, &obj)
+	case *model.Product:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Product(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -2957,7 +3030,7 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var productImplementors = []string{"Product"}
+var productImplementors = []string{"Product", "Node"}
 
 func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *model.Product) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)
@@ -2999,7 +3072,7 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var productConnectionImplementors = []string{"ProductConnection"}
+var productConnectionImplementors = []string{"ProductConnection", "Connection"}
 
 func (ec *executionContext) _ProductConnection(ctx context.Context, sel ast.SelectionSet, obj *model.ProductConnection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, productConnectionImplementors)
@@ -3038,7 +3111,7 @@ func (ec *executionContext) _ProductConnection(ctx context.Context, sel ast.Sele
 	return out
 }
 
-var productEdgeImplementors = []string{"ProductEdge"}
+var productEdgeImplementors = []string{"ProductEdge", "Edge"}
 
 func (ec *executionContext) _ProductEdge(ctx context.Context, sel ast.SelectionSet, obj *model.ProductEdge) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, productEdgeImplementors)
@@ -3863,6 +3936,22 @@ func (ec *executionContext) unmarshalOCursor2ᚖstring(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOCursor2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalODate2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODate2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

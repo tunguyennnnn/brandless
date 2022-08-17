@@ -10,7 +10,7 @@ import (
 	"web-server/repositories"
 )
 
-func (r *queryResolver) Products(ctx context.Context, limit *int) (*model.ProductConnection, error) {
+func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string) (*model.ProductConnection, error) {
 	var queryLimit int
 
 	if limit == nil {
@@ -19,16 +19,23 @@ func (r *queryResolver) Products(ctx context.Context, limit *int) (*model.Produc
 		queryLimit = *limit
 	}
 
-	products := repositories.GetProducts(queryLimit)
-
+	products := repositories.GetProducts(queryLimit, cursor)
+	var edges []*model.ProductEdge
 	if len(products) == 0 {
-		return nil, nil
+		return &model.ProductConnection{
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+				StartCursor:     cursor,
+				EndCursor:       nil,
+			},
+			TotalCount: 0,
+			Edges:      edges,
+		}, nil
 	}
 
-	var edges []*model.ProductEdge
-
 	for _, product := range products {
-		createdAt := product.CreatedAt.String()
+		createdAt := strconv.FormatInt(product.CreatedAt.UnixNano(), 10)
 		edges = append(edges, &model.ProductEdge{
 			Node: &model.Product{
 				ID:        strconv.Itoa(product.Id),

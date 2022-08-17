@@ -5,6 +5,21 @@ type Query {
   health: String!
 }
 
+interface Node {
+  id: ID!
+}
+
+interface Edge {
+  node: Node
+  cursor: Cursor!
+}
+
+interface Connection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [Edge]
+}
+
 type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!

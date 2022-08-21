@@ -14,6 +14,29 @@ type Node interface {
 	IsNode()
 }
 
+type Brand struct {
+	ID       string             `json:"id"`
+	Name     string             `json:"name"`
+	Products *ProductConnection `json:"products"`
+}
+
+func (Brand) IsNode() {}
+
+type BrandConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*ProductEdge `json:"edges"`
+}
+
+func (BrandConnection) IsConnection() {}
+
+type BrandEdge struct {
+	Node   *Brand `json:"node"`
+	Cursor string `json:"cursor"`
+}
+
+func (BrandEdge) IsEdge() {}
+
 type PageInfo struct {
 	HasNextPage     bool    `json:"hasNextPage"`
 	HasPreviousPage bool    `json:"hasPreviousPage"`
@@ -22,9 +45,14 @@ type PageInfo struct {
 }
 
 type Product struct {
-	ID        string `json:"id"`
-	ProductID string `json:"productId"`
-	Name      string `json:"name"`
+	ID        string   `json:"id"`
+	ProductID string   `json:"productId"`
+	Name      string   `json:"name"`
+	Link      string   `json:"link"`
+	Brand     *Brand   `json:"brand"`
+	BrandID   string   `json:"brandId"`
+	Images    []string `json:"images"`
+	CreatedAt string   `json:"createdAt"`
 }
 
 func (Product) IsNode() {}

@@ -2,6 +2,8 @@ package repositories
 
 import (
 	model "web-server/models"
+
+	"github.com/go-pg/pg/v10"
 )
 
 func GetBrandByIds(ids []string) []model.Brand {
@@ -9,7 +11,7 @@ func GetBrandByIds(ids []string) []model.Brand {
 	var brands []model.Brand
 	var err error
 
-	err = db.Model(&brands).Where("id IN (1, 2)").Select()
+	err = db.Model(&brands).Where("id IN (?)", pg.In(ids)).Select()
 
 	if err != nil {
 		panic(err)

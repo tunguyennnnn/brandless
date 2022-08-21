@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-pg/migrations/v8"
 )
@@ -31,14 +32,14 @@ var productMockData = []ProductData{
 	{
 		Name:      "SAMBA OG SHOES",
 		ProductId: "ADIDAS-SAMBA-OG-SHOES",
-		Images:    []string{`https://brand.assets.adidas.com/image/upload/f_auto,q_auto,fl_lossy/enUS/Images/mens-shoes-v2-tcc_tcm221-909628.png`},
+		Images:    []string{`https://brand.assets.adidas.com/image/upload/f_auto\,q_auto\,fl_lossy/enUS/Images/mens-shoes-v2-tcc_tcm221-909628.png`},
 		BrandId:   1,
 		Link:      `https://www.adidas.com/us/nmd_r1-shoes/GW5680.html`,
 	},
 	{
 		Name:      "Beige Shoes",
 		ProductId: "ADIDAS-Beige-Shoes",
-		Images:    []string{`https://assets.adidas.com/images/w_383,h_383,f_auto,q_auto,fl_lossy,c_fill,g_auto/773b1e3177d04d96968cadf8006f0d9f_9366/nmd_r1-shoes.jpg`},
+		Images:    []string{`https://assets.adidas.com/images/w_383\,h_383\,f_auto\,q_auto\,fl_lossy\,c_fill\,g_auto/773b1e3177d04d96968cadf8006f0d9f_9366/nmd_r1-shoes.jpg`},
 		BrandId:   1,
 		Link:      `https://www.adidas.com/us/nmd_r1-shoes/GW5680.html`,
 	},
@@ -52,7 +53,7 @@ var productMockData = []ProductData{
 	{
 		Name:      "EDGE LUX SHOES",
 		ProductId: "ADIDAS-EDGE-LUX-SHOES",
-		Images:    []string{`https://assets.adidas.com/images/w_600,f_auto,q_auto/25c48240523645c09b05ad6700bb06c1_9366/Edge_Lux_Shoes_Pink_GX0592.jpg`},
+		Images:    []string{`https://assets.adidas.com/images/w_600\,f_auto\,q_auto/25c48240523645c09b05ad6700bb06c1_9366/Edge_Lux_Shoes_Pink_GX0592.jpg`},
 		BrandId:   1,
 		Link:      `https://www.adidas.com/us/edge-lux-shoes/GX0592.html`,
 	},
@@ -74,7 +75,7 @@ func init() {
 		fmt.Println("seeding products...")
 
 		for _, product := range productMockData {
-			_, err = db.Exec(fmt.Sprintf(`INSERT INTO products (name, product_id, brand_id, link) VALUES ('%s', '%s', %d, '%s');`, product.Name, product.ProductId, product.BrandId, product.Link))
+			_, err = db.Exec(fmt.Sprintf(`INSERT INTO products (name, product_id, brand_id, link, images) VALUES ('%s', '%s', %d, '%s', '{%s}');`, product.Name, product.ProductId, product.BrandId, product.Link, strings.Join(product.Images, ", ")))
 			if err != nil {
 				fmt.Println("Error creating product", err, product)
 				panic(err)

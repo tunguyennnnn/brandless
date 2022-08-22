@@ -27,7 +27,7 @@ func (r *productResolver) Brand(ctx context.Context, obj *model.Product) (*model
 	return result.(*model.Brand), nil
 }
 
-func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string) (*model.ProductConnection, error) {
+func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string, brandID *string) (*model.ProductConnection, error) {
 	var queryLimit int
 
 	if limit == nil {
@@ -36,7 +36,7 @@ func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string
 		queryLimit = *limit
 	}
 
-	products := repositories.GetProducts(queryLimit, cursor)
+	products := repositories.GetProducts(queryLimit, cursor, brandID)
 	var edges []*model.ProductEdge
 	if len(products) == 0 {
 		return &model.ProductConnection{

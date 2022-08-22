@@ -17,15 +17,16 @@ type Node interface {
 type Brand struct {
 	ID       string             `json:"id"`
 	Name     string             `json:"name"`
+	Logo     *string            `json:"logo"`
 	Products *ProductConnection `json:"products"`
 }
 
 func (Brand) IsNode() {}
 
 type BrandConnection struct {
-	TotalCount int            `json:"totalCount"`
-	PageInfo   *PageInfo      `json:"pageInfo"`
-	Edges      []*ProductEdge `json:"edges"`
+	TotalCount int          `json:"totalCount"`
+	PageInfo   *PageInfo    `json:"pageInfo"`
+	Edges      []*BrandEdge `json:"edges"`
 }
 
 func (BrandConnection) IsConnection() {}

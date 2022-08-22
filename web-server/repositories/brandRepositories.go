@@ -19,3 +19,17 @@ func GetBrandByIds(ids []string) []model.Brand {
 
 	return brands
 }
+
+func GetBrands(limit int) []model.Brand {
+	db := model.GetDB()
+	var brands []model.Brand
+	var err error
+
+	err = db.Model(&brands).Limit(limit).Select()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return brands
+}

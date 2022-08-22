@@ -1,13 +1,14 @@
 type Brand implements Node {
   id: ID!
   name: String!
+  logo: String
   products: ProductConnection! @goField(forceResolver: true)
 }
 
 type BrandConnection implements Connection {
   totalCount: Int!
   pageInfo: PageInfo!
-  edges: [ProductEdge]
+  edges: [BrandEdge]
 }
 
 type BrandEdge implements Edge {

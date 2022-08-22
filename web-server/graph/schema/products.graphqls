@@ -21,6 +21,6 @@ type ProductEdge implements Edge {
 }
 
 extend type Query {
-  products(limit: Int, cursor: Date): ProductConnection!
+  products(limit: Int, cursor: Date, brandId: ID): ProductConnection!
     @goField(forceResolver: true)
 }

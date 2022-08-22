@@ -17,14 +17,17 @@ type ProductData struct {
 
 type BrandData struct {
 	Name string
+	Logo string
 }
 
 var brandMockData = []BrandData{
 	{
 		Name: "Adidas",
+		Logo: `https://w7.pngwing.com/pngs/488/478/png-transparent-adidas-originals-t-shirt-logo-brand-adidas-angle-text-retail.png`,
 	},
 	{
 		Name: "Gucci",
+		Logo: `https://italynews.online/wp-content/uploads/2022/03/Gucci-logo-e1648317774513.jpg`,
 	},
 }
 
@@ -64,7 +67,7 @@ func init() {
 		fmt.Println("seeding brands...")
 		var err error
 		for _, brand := range brandMockData {
-			_, err = db.Exec(fmt.Sprintf(`INSERT INTO brands (name) VALUES ('%s');`, brand.Name))
+			_, err = db.Exec(fmt.Sprintf(`INSERT INTO brands (name, logo) VALUES ('%s', '%s');`, brand.Name, brand.Logo))
 
 			if err != nil {
 				fmt.Println("Error creating brand", err, brand)

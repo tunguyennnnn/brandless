@@ -47,6 +47,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Brand struct {
 		ID       func(childComplexity int) int
+		Logo     func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Products func(childComplexity int) int
 	}
@@ -94,7 +95,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Brands   func(childComplexity int, limit *int, cursor *string) int
 		Health   func(childComplexity int) int
-		Products func(childComplexity int, limit *int, cursor *string) int
+		Products func(childComplexity int, limit *int, cursor *string, brandID *string) int
 	}
 }
 
@@ -107,7 +108,7 @@ type ProductResolver interface {
 type QueryResolver interface {
 	Health(ctx context.Context) (string, error)
 	Brands(ctx context.Context, limit *int, cursor *string) (*model.BrandConnection, error)
-	Products(ctx context.Context, limit *int, cursor *string) (*model.ProductConnection, error)
+	Products(ctx context.Context, limit *int, cursor *string, brandID *string) (*model.ProductConnection, error)
 }
 
 type executableSchema struct {
@@ -131,6 +132,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Brand.ID(childComplexity), true
+
+	case "Brand.logo":
+		if e.complexity.Brand.Logo == nil {
+			break
+		}
+
+		return e.complexity.Brand.Logo(childComplexity), true
 
 	case "Brand.name":
 		if e.complexity.Brand.Name == nil {
@@ -329,7 +337,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Products(childComplexity, args["limit"].(*int), args["cursor"].(*string)), true
+		return e.complexity.Query.Products(childComplexity, args["limit"].(*int), args["cursor"].(*string), args["brandId"].(*string)), true
 
 	}
 	return 0, false
@@ -386,13 +394,14 @@ var sources = []*ast.Source{
 	{Name: "../schema/brands.graphqls", Input: `type Brand implements Node {
   id: ID!
   name: String!
+  logo: String
   products: ProductConnection! @goField(forceResolver: true)
 }
 
 type BrandConnection implements Connection {
   totalCount: Int!
   pageInfo: PageInfo!
-  edges: [ProductEdge]
+  edges: [BrandEdge]
 }
 
 type BrandEdge implements Edge {
@@ -462,7 +471,7 @@ type ProductEdge implements Edge {
 }
 
 extend type Query {
-  products(limit: Int, cursor: Date): ProductConnection!
+  products(limit: Int, cursor: Date, brandId: ID): ProductConnection!
     @goField(forceResolver: true)
 }
 `, BuiltIn: false},
@@ -533,6 +542,15 @@ func (ec *executionContext) field_Query_products_args(ctx context.Context, rawAr
 		}
 	}
 	args["cursor"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["brandId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("brandId"))
+		arg2, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["brandId"] = arg2
 	return args, nil
 }
 
@@ -650,6 +668,47 @@ func (ec *executionContext) _Brand_name(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) fieldContext_Brand_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Brand",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Brand_logo(ctx context.Context, field graphql.CollectedField, obj *model.Brand) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Brand_logo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Logo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Brand_logo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Brand",
 		Field:      field,
@@ -835,9 +894,9 @@ func (ec *executionContext) _BrandConnection_edges(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.ProductEdge)
+	res := resTmp.([]*model.BrandEdge)
 	fc.Result = res
-	return ec.marshalOProductEdge2ᚕᚖwebᚑserverᚋgraphᚋmodelᚐProductEdge(ctx, field.Selections, res)
+	return ec.marshalOBrandEdge2ᚕᚖwebᚑserverᚋgraphᚋmodelᚐBrandEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_BrandConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -849,11 +908,11 @@ func (ec *executionContext) fieldContext_BrandConnection_edges(ctx context.Conte
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "node":
-				return ec.fieldContext_ProductEdge_node(ctx, field)
+				return ec.fieldContext_BrandEdge_node(ctx, field)
 			case "cursor":
-				return ec.fieldContext_ProductEdge_cursor(ctx, field)
+				return ec.fieldContext_BrandEdge_cursor(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ProductEdge", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type BrandEdge", field.Name)
 		},
 	}
 	return fc, nil
@@ -899,6 +958,8 @@ func (ec *executionContext) fieldContext_BrandEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Brand_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Brand_name(ctx, field)
+			case "logo":
+				return ec.fieldContext_Brand_logo(ctx, field)
 			case "products":
 				return ec.fieldContext_Brand_products(ctx, field)
 			}
@@ -1338,6 +1399,8 @@ func (ec *executionContext) fieldContext_Product_brand(ctx context.Context, fiel
 				return ec.fieldContext_Brand_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Brand_name(ctx, field)
+			case "logo":
+				return ec.fieldContext_Brand_logo(ctx, field)
 			case "products":
 				return ec.fieldContext_Brand_products(ctx, field)
 			}
@@ -1845,7 +1908,7 @@ func (ec *executionContext) _Query_products(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Products(rctx, fc.Args["limit"].(*int), fc.Args["cursor"].(*string))
+		return ec.resolvers.Query().Products(rctx, fc.Args["limit"].(*int), fc.Args["cursor"].(*string), fc.Args["brandId"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3897,6 +3960,10 @@ func (ec *executionContext) _Brand(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "logo":
+
+			out.Values[i] = ec._Brand_logo(ctx, field, obj)
+
 		case "products":
 			field := field
 
@@ -5040,6 +5107,54 @@ func (ec *executionContext) marshalOBrand2ᚖwebᚑserverᚋgraphᚋmodelᚐBran
 	return ec._Brand(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOBrandEdge2ᚕᚖwebᚑserverᚋgraphᚋmodelᚐBrandEdge(ctx context.Context, sel ast.SelectionSet, v []*model.BrandEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOBrandEdge2ᚖwebᚑserverᚋgraphᚋmodelᚐBrandEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOBrandEdge2ᚖwebᚑserverᚋgraphᚋmodelᚐBrandEdge(ctx context.Context, sel ast.SelectionSet, v *model.BrandEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._BrandEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOCursor2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -5069,6 +5184,22 @@ func (ec *executionContext) marshalODate2ᚖstring(ctx context.Context, sel ast.
 		return graphql.Null
 	}
 	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalID(*v)
 	return res
 }
 

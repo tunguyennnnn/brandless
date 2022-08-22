@@ -11,6 +11,7 @@ type Brand struct {
 	tableName struct{} `pg:"brands,alias:b"`
 	Id        int
 	Name      string
+	Logo      string
 	CreatedAt time.Time `pg:"default:now()"`
 }
 

@@ -49,7 +49,7 @@ func (r *queryResolver) Brands(ctx context.Context, limit *int, cursor *string) 
 			Node: &model.Brand{
 				ID:   id,
 				Name: brand.Name,
-				Logo: &brand.Logo,
+				Logo: brand.Logo,
 			},
 			Cursor: id,
 		})

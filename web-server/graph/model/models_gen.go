@@ -17,7 +17,7 @@ type Node interface {
 type Brand struct {
 	ID       string             `json:"id"`
 	Name     string             `json:"name"`
-	Logo     *string            `json:"logo"`
+	Logo     string             `json:"logo"`
 	Products *ProductConnection `json:"products"`
 }
 

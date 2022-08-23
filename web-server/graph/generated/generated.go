@@ -394,7 +394,7 @@ var sources = []*ast.Source{
 	{Name: "../schema/brands.graphqls", Input: `type Brand implements Node {
   id: ID!
   name: String!
-  logo: String
+  logo: String!
   products: ProductConnection! @goField(forceResolver: true)
 }
 
@@ -701,11 +701,14 @@ func (ec *executionContext) _Brand_logo(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Brand_logo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3964,6 +3967,9 @@ func (ec *executionContext) _Brand(ctx context.Context, sel ast.SelectionSet, ob
 
 			out.Values[i] = ec._Brand_logo(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "products":
 			field := field
 

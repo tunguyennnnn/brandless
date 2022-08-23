@@ -1,6 +1,7 @@
 import React from 'react';
+
 import Gallery from '../containers/Gallary';
-import SideBar from '../containers/SideBar';
+import BrandList from '../containers/BrandList';
 
 function Home() {
   return (
@@ -16,10 +17,10 @@ function Home() {
         </div>
       </div>
       <div className="page-content">
-        <SideBar />
+        <BrandList />
         <div className="content-wrapper"></div>
         <div className="content">
-          <Gallery />
+          <Gallery filter={{ type: 'product' }} />
         </div>
       </div>
     </div>

@@ -14,9 +14,8 @@ export default {
   devServer: {
     static: path.join(__dirname, 'build'),
     historyApiFallback: true,
-
     proxy: {
-      '/graphql': 'http://localhost:4000',
+      '/query': 'http://localhost:4000',
     },
     port: 8080,
     open: true,

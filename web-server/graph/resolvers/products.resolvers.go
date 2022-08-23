@@ -6,11 +6,28 @@ package graph
 import (
 	"context"
 	"strconv"
+	Loader "web-server/dataloader"
+	"web-server/graph/generated"
 	"web-server/graph/model"
 	"web-server/repositories"
+
+	"github.com/graph-gophers/dataloader"
 )
 
-func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string) (*model.ProductConnection, error) {
+func (r *productResolver) Brand(ctx context.Context, obj *model.Product) (*model.Brand, error) {
+	loaders := Loader.For(ctx)
+
+	thunk := loaders.BrandLoader.Load(ctx, dataloader.StringKey(obj.BrandID))
+	result, err := thunk()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result.(*model.Brand), nil
+}
+
+func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string, brandID *string) (*model.ProductConnection, error) {
 	var queryLimit int
 
 	if limit == nil {
@@ -19,7 +36,7 @@ func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string
 		queryLimit = *limit
 	}
 
-	products := repositories.GetProducts(queryLimit, cursor)
+	products := repositories.GetProducts(queryLimit, cursor, brandID)
 	var edges []*model.ProductEdge
 	if len(products) == 0 {
 		return &model.ProductConnection{
@@ -36,11 +53,16 @@ func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string
 
 	for _, product := range products {
 		createdAt := strconv.FormatInt(product.CreatedAt.UnixNano(), 10)
+
 		edges = append(edges, &model.ProductEdge{
 			Node: &model.Product{
 				ID:        strconv.Itoa(product.Id),
 				Name:      product.Name,
 				ProductID: product.ProductId,
+				CreatedAt: createdAt,
+				BrandID:   strconv.Itoa(product.BrandId),
+				Link:      product.Link,
+				Images:    product.Images,
 			},
 			Cursor: createdAt,
 		})
@@ -66,3 +88,8 @@ func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string
 
 	return res, nil
 }
+
+// Product returns generated.ProductResolver implementation.
+func (r *Resolver) Product() generated.ProductResolver { return &productResolver{r} }
+
+type productResolver struct{ *Resolver }

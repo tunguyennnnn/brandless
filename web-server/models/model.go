@@ -43,15 +43,27 @@ func GetDB() *pg.DB {
 	return db
 }
 
+type DefineModelPair struct {
+	model       interface{}
+	createIndex func(db *pg.DB) error
+}
+
 func createSchema(db *pg.DB) error {
-	models := []interface{}{
-		(*Product)(nil),
+	models := []DefineModelPair{
+		{(*Product)(nil), CreateProductIndex},
+		{(*Brand)(nil), CreateBrandIndex},
 	}
 
-	for _, model := range models {
-		err := db.Model(model).CreateTable(&orm.CreateTableOptions{
+	for _, pair := range models {
+		err := db.Model(pair.model).CreateTable(&orm.CreateTableOptions{
 			IfNotExists: true,
 		})
+
+		if err != nil {
+			return err
+		}
+
+		err = pair.createIndex(db)
 
 		if err != nil {
 			return err

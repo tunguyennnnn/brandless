@@ -4,9 +4,10 @@
     "containers": "docker-compose -f dev/docker-compose.yml up",
     "containers:down": "docker-compose -f dev/docker-compose.yml down",
     "web-app": "cd web-app && npm start",
-    "migration:init": "docker exec -ti brandless-web-backend \"./server\" \"init\"",
-    "migration:up": "docker exec -ti brandless-web-backend \"./server\" \"up\"",
-    "migration:down": "docker exec -ti brandless-web-backend \"./server\" \"down\""
+    "migration:init": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go init\"",
+    "migration:up": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go up\"",
+    "migration:down": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go up\"",
+    "graphql:generate": "go run github.com/99designs/gqlgen generate"
   },
   "dependencies": {
     "prettier": "^2.7.1"

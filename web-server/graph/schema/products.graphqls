@@ -2,6 +2,11 @@ type Product implements Node {
   id: ID!
   productId: String!
   name: String!
+  link: String!
+  brand: Brand @goField(forceResolver: true)
+  brandId: ID!
+  images: [String!]
+  createdAt: Date!
 }
 
 type ProductConnection implements Connection {
@@ -16,5 +21,6 @@ type ProductEdge implements Edge {
 }
 
 extend type Query {
-  products(limit: Int, cursor: Date): ProductConnection!
+  products(limit: Int, cursor: Date, brandId: ID): ProductConnection!
+    @goField(forceResolver: true)
 }

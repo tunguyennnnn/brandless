@@ -1,0 +1,22 @@
+type Brand implements Node {
+  id: ID!
+  name: String!
+  logo: String!
+  products: ProductConnection! @goField(forceResolver: true)
+}
+
+type BrandConnection implements Connection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [BrandEdge]
+}
+
+type BrandEdge implements Edge {
+  node: Brand
+  cursor: Cursor!
+}
+
+extend type Query {
+  brands(limit: Int, cursor: Date): BrandConnection!
+    @goField(forceResolver: true)
+}

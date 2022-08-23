@@ -1,5 +1,6 @@
 import configPath from './config.path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 
 export default {
   entry: configPath.entryPath,
@@ -37,6 +38,15 @@ export default {
     extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: configPath.assetPath,
+          to: configPath.outputPath,
+          toType: 'dir',
+        },
+      ],
+    }),
     new HtmlWebpackPlugin({
       template: configPath.templatePath,
     }),

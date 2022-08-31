@@ -27,6 +27,41 @@ func (r *productResolver) Brand(ctx context.Context, obj *model.Product) (*model
 	return result.(*model.Brand), nil
 }
 
+func (r *productResolver) Reviews(ctx context.Context, obj *model.Product, limit *int, cursor *string) (*model.CommentConnection, error) {
+	comments := repositories.GetProductReviews(obj.ID)
+
+	var edges []*model.CommentEdge
+
+	for _, comment := range comments {
+		createdAt := strconv.FormatInt(comment.CreatedAt.UnixNano(), 10)
+
+		edges = append(edges, &model.CommentEdge{
+			Node: &model.Comment{
+				ID:        strconv.Itoa(comment.Id),
+				Content:   comment.Content,
+				Media:     comment.Media,
+				CreatedAt: createdAt,
+			},
+			Cursor: createdAt,
+		})
+	}
+
+	var res *model.CommentConnection
+
+	res = &model.CommentConnection{
+		PageInfo: &model.PageInfo{
+			HasNextPage:     false,
+			HasPreviousPage: false,
+			StartCursor:     nil,
+			EndCursor:       nil,
+		},
+		TotalCount: 100,
+		Edges:      edges,
+	}
+
+	return res, nil
+}
+
 func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string, brandID *string) (*model.ProductConnection, error) {
 	var queryLimit int
 
@@ -84,6 +119,22 @@ func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string
 		},
 		TotalCount: 100,
 		Edges:      edges,
+	}
+
+	return res, nil
+}
+
+func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product, error) {
+	product := repositories.GetProductById(id)
+
+	res := &model.Product{
+		ID:        strconv.Itoa(product.Id),
+		Name:      product.Name,
+		ProductID: product.ProductId,
+		CreatedAt: strconv.FormatInt(product.CreatedAt.UnixNano(), 10),
+		BrandID:   strconv.Itoa(product.BrandId),
+		Link:      product.Link,
+		Images:    product.Images,
 	}
 
 	return res, nil

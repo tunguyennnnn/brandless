@@ -20,6 +20,45 @@ type BrandData struct {
 	Logo string
 }
 
+type Review struct {
+	ProductId int
+}
+
+type Comment struct {
+	ProductId int
+	UserID    int
+	UserType  string
+	Media     []string
+	Content   string
+}
+
+var reviewMockData = []Review{
+	{
+		ProductId: 1,
+	},
+	{
+		ProductId: 2,
+	},
+}
+
+var commentMockData = []Comment{
+	{
+		ProductId: 1,
+		UserType:  "anonymous",
+		Content:   "Very good product",
+	},
+	{
+		ProductId: 2,
+		UserType:  "anonymous",
+		Content:   "Very good product",
+	},
+	{
+		ProductId: 1,
+		UserType:  "anonymous",
+		Content:   "Very good product",
+	},
+}
+
 var brandMockData = []BrandData{
 	{
 		Name: "Adidas",
@@ -85,11 +124,33 @@ func init() {
 			}
 		}
 
+		fmt.Println("seeding review...")
+
+		for _, review := range reviewMockData {
+			_, err = db.Exec(fmt.Sprintf(`INSERT INTO reviews (product_id) VALUES (%d);`, review.ProductId))
+			if err != nil {
+				fmt.Println("Error creating product", err, review)
+				panic(err)
+			}
+		}
+
+		fmt.Println("seeding comment...")
+
+		for _, comment := range commentMockData {
+			_, err = db.Exec(fmt.Sprintf(`INSERT INTO comments (product_id, user_type, content) VALUES (%d, '%s', '%s');`, comment.ProductId, comment.UserType, comment.Content))
+			if err != nil {
+				fmt.Println("Error creating product", err, comment)
+				panic(err)
+			}
+		}
+
 		return err
 	}, func(db migrations.DB) error {
 		fmt.Println("truncating...")
 		_, err := db.Exec(`TRUNCATE products`)
 		_, err = db.Exec(`TRUNCATE brands`)
+		_, err = db.Exec(`TRUNCATE reviews`)
+		_, err = db.Exec(`TRUNCATE comments`)
 		return err
 	})
 }

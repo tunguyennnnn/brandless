@@ -52,6 +52,8 @@ func createSchema(db *pg.DB) error {
 	models := []DefineModelPair{
 		{(*Product)(nil), CreateProductIndex},
 		{(*Brand)(nil), CreateBrandIndex},
+		{(*Comment)(nil), CreateCommentIndex},
+		{(*Review)(nil), CreateReviewIndex},
 	}
 
 	for _, pair := range models {

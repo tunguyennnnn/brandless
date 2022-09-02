@@ -36,3 +36,17 @@ func GetProducts(limit int, from *string, brandId *string) []model.Product {
 
 	return products
 }
+
+func GetProductById(id string) *model.Product {
+	db := model.GetDB()
+	var product model.Product
+	var err error
+
+	err = db.Model(&product).Where("id = ?", id).Select()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return &product
+}

@@ -38,6 +38,30 @@ type BrandEdge struct {
 
 func (BrandEdge) IsEdge() {}
 
+type Comment struct {
+	ID        string   `json:"id"`
+	Media     []string `json:"media"`
+	Content   string   `json:"content"`
+	CreatedAt string   `json:"createdAt"`
+}
+
+func (Comment) IsNode() {}
+
+type CommentConnection struct {
+	TotalCount int            `json:"totalCount"`
+	PageInfo   *PageInfo      `json:"pageInfo"`
+	Edges      []*CommentEdge `json:"edges"`
+}
+
+func (CommentConnection) IsConnection() {}
+
+type CommentEdge struct {
+	Node   *Comment `json:"node"`
+	Cursor string   `json:"cursor"`
+}
+
+func (CommentEdge) IsEdge() {}
+
 type PageInfo struct {
 	HasNextPage     bool    `json:"hasNextPage"`
 	HasPreviousPage bool    `json:"hasPreviousPage"`
@@ -46,14 +70,15 @@ type PageInfo struct {
 }
 
 type Product struct {
-	ID        string   `json:"id"`
-	ProductID string   `json:"productId"`
-	Name      string   `json:"name"`
-	Link      string   `json:"link"`
-	Brand     *Brand   `json:"brand"`
-	BrandID   string   `json:"brandId"`
-	Images    []string `json:"images"`
-	CreatedAt string   `json:"createdAt"`
+	ID        string             `json:"id"`
+	ProductID string             `json:"productId"`
+	Name      string             `json:"name"`
+	Link      string             `json:"link"`
+	Brand     *Brand             `json:"brand"`
+	BrandID   string             `json:"brandId"`
+	Images    []string           `json:"images"`
+	Reviews   *CommentConnection `json:"reviews"`
+	CreatedAt string             `json:"createdAt"`
 }
 
 func (Product) IsNode() {}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+  </head>
+  <body style="margin: 0;">
+    <div id="my-item"></div>
+    <script>
+      window.addEventListener('load', (event) => {
+        console.log('page is fully loaded');
+        Preview.renderReviewer({
+          targetDom: document.getElementById('my-item'),
+          itemId: '123',
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+type Comment implements Node {
+  id: ID!
+  media: [String!]
+  content: String!
+  createdAt: Date!
+}
+
+type CommentConnection implements Connection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [CommentEdge]
+}
+
+type CommentEdge implements Edge {
+  node: Comment!
+  cursor: Cursor!
+}

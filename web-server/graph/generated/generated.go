@@ -112,10 +112,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Brands   func(childComplexity int, limit *int, cursor *string) int
-		Health   func(childComplexity int) int
-		Product  func(childComplexity int, id string) int
-		Products func(childComplexity int, limit *int, cursor *string, brandID *string) int
+		Brands           func(childComplexity int, limit *int, cursor *string) int
+		DiscoverProducts func(childComplexity int, url string) int
+		Health           func(childComplexity int) int
+		Product          func(childComplexity int, id string) int
+		Products         func(childComplexity int, limit *int, cursor *string, brandID *string) int
 	}
 }
 
@@ -132,6 +133,7 @@ type QueryResolver interface {
 	Brands(ctx context.Context, limit *int, cursor *string) (*model.BrandConnection, error)
 	Products(ctx context.Context, limit *int, cursor *string, brandID *string) (*model.ProductConnection, error)
 	Product(ctx context.Context, id string) (*model.Product, error)
+	DiscoverProducts(ctx context.Context, url string) (bool, error)
 }
 
 type executableSchema struct {
@@ -418,6 +420,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Brands(childComplexity, args["limit"].(*int), args["cursor"].(*string)), true
 
+	case "Query.discoverProducts":
+		if e.complexity.Query.DiscoverProducts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_discoverProducts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DiscoverProducts(childComplexity, args["url"].(string)), true
+
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
 			break
@@ -604,6 +618,7 @@ extend type Query {
   products(limit: Int, cursor: Date, brandId: ID): ProductConnection!
     @goField(forceResolver: true)
   product(id: ID!): Product
+  discoverProducts(url: String!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -673,6 +688,21 @@ func (ec *executionContext) field_Query_brands_args(ctx context.Context, rawArgs
 		}
 	}
 	args["cursor"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_discoverProducts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["url"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["url"] = arg0
 	return args, nil
 }
 
@@ -2677,6 +2707,61 @@ func (ec *executionContext) fieldContext_Query_product(ctx context.Context, fiel
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_product_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_discoverProducts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_discoverProducts(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DiscoverProducts(rctx, fc.Args["url"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_discoverProducts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_discoverProducts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -5252,6 +5337,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_product(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "discoverProducts":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_discoverProducts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 

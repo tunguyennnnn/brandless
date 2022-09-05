@@ -17,6 +17,18 @@ services:
     volumes:
       - ../web-server:/project/app
     restart: on-failure
+  product-scraper:
+    networks:
+      - webnetwork
+    container_name: brandless-product-scraper
+    build:
+      context: ../
+      dockerfile: ./dev/Dockerfile.productScraper
+    ports:
+      - "4001:4001"
+    volumes:
+      - ../product-scraper:/project/app
+    restart: on-failure
   db:
     networks:
       - webnetwork

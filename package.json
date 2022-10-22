@@ -7,7 +7,8 @@
     "migration:init": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go init\"",
     "migration:up": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go up\"",
     "migration:down": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go up\"",
-    "graphql:generate": "cd web-server && go run github.com/99designs/gqlgen generate"
+    "graphql:generate": "cd web-server && go run github.com/99designs/gqlgen generate",
+    "proto:generate": "protoc --proto_path=protobuf --go_out=product-scraper --go-grpc_out=product-scraper admin-apis.proto"
   },
   "dependencies": {
     "prettier": "^2.7.1"

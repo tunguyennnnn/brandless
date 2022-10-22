@@ -1,0 +1,15 @@
+syntax="proto3";
+option go_package = "adminapis/";
+
+service AdminAPIService {
+  rpc pullProducts(PullProductsRequest) returns(PullProductsResponse);
+}
+
+message PullProductsRequest {
+  string url = 1;
+}
+
+message PullProductsResponse {
+  bool isDone = 1;
+  int32 percentage = 2;
+}

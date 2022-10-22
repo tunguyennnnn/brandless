@@ -10,6 +10,7 @@ import (
 	"web-server/graph/generated"
 	"web-server/graph/model"
 	"web-server/repositories"
+	"web-server/services/endpoints"
 
 	"github.com/graph-gophers/dataloader"
 )
@@ -138,6 +139,11 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product,
 	}
 
 	return res, nil
+}
+
+func (r *queryResolver) DiscoverProducts(ctx context.Context, url string) (bool, error) {
+	endpoints.DiscoverProduct(url)
+	return true, nil
 }
 
 // Product returns generated.ProductResolver implementation.

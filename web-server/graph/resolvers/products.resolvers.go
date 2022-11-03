@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	Loader "web-server/dataloader"
 	"web-server/graph/generated"
@@ -34,7 +35,7 @@ func (r *productResolver) Reviews(ctx context.Context, obj *model.Product, limit
 	var edges []*model.CommentEdge
 
 	for _, comment := range comments {
-		createdAt := strconv.FormatInt(comment.CreatedAt.UnixNano(), 10)
+		createdAt := strconv.FormatInt(comment.CreatedAt.UnixMilli(), 10)
 
 		edges = append(edges, &model.CommentEdge{
 			Node: &model.Comment{
@@ -88,8 +89,8 @@ func (r *queryResolver) Products(ctx context.Context, limit *int, cursor *string
 	}
 
 	for _, product := range products {
-		createdAt := strconv.FormatInt(product.CreatedAt.UnixNano(), 10)
-
+		createdAt := strconv.FormatInt(product.CreatedAt.UnixMilli(), 10)
+		fmt.Println("createdAt", createdAt)
 		edges = append(edges, &model.ProductEdge{
 			Node: &model.Product{
 				ID:        strconv.Itoa(product.Id),
@@ -132,7 +133,7 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product,
 		ID:        strconv.Itoa(product.Id),
 		Name:      product.Name,
 		ProductID: product.ProductId,
-		CreatedAt: strconv.FormatInt(product.CreatedAt.UnixNano(), 10),
+		CreatedAt: strconv.FormatInt(product.CreatedAt.UnixMilli(), 10),
 		BrandID:   strconv.Itoa(product.BrandId),
 		Link:      product.Link,
 		Images:    product.Images,

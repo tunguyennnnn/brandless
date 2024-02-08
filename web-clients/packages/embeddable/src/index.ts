@@ -1,18 +1,23 @@
+import { InitializeOptions, RenderOptions } from './global';
 import { listProducts } from './mainApis/adminApis';
 
-async function setup(options = {}) {
+declare let FRAME_JS_URL: string;
+
+async function initialize(options: InitializeOptions) {
   // const brandId = options.brandId;
 }
 
-function writeToIframe(iframe) {
+function writeToIframe(iframe: HTMLIFrameElement) {
   const iframeDoc = iframe.contentWindow && iframe.contentWindow.document;
+
+  if (!iframeDoc) {
+    throw new Error('Invalid iframe');
+  }
 
   iframeDoc.open();
 
   // eslint-disable-next-line no-undef
-  const script = FRAME_JS_URL || '';
-
-  console.log('script', script);
+  const script = FRAME_JS_URL;
 
   iframeDoc.write(`
     <!DOCTYPE html>
@@ -83,21 +88,24 @@ function writeToIframe(iframe) {
   iframeDoc.close();
 }
 
-function mountIframe(brandId, targetDom, styles) {
+function mountIframe(
+  brandId: string,
+  targetDom: HTMLElement,
+  styles: RenderOptions['styles']
+) {
   const iframe = document.createElement('iframe');
-  iframe.frameBorder = 0;
   iframe.allowFullscreen = true;
-  iframe.allowTransparency = true;
   iframe.onload = writeToIframe.bind(null, iframe);
 
   for (const style in styles) {
-    iframe.style[style] = styles[style];
+    iframe.style[style as any] = styles[style];
   }
 
   targetDom.appendChild(iframe);
 }
 
-async function renderReviewer(options = {}) {
+async function renderReviewer(options: RenderOptions) {
+  const { styles = {} } = options;
   if (!options.itemId) {
     throw new Error('itemId is required');
   }
@@ -107,15 +115,16 @@ async function renderReviewer(options = {}) {
   }
 
   const iframeStyles = {
-    width: options.width || '100vw',
-    minHeight: options.minHeight || '700px',
+    ...styles,
+    width: styles.width || 'inherit',
+    minHeight: styles.minHeight || '700px',
   };
 
-  mountIframe('123', options.targetDom, iframeStyles);
+  mountIframe(options.itemId, options.targetDom, iframeStyles);
 }
 
-window.Preview = {
-  setup,
+window.Review = {
+  initialize,
   renderReviewer,
   apis: {
     listProducts,

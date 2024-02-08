@@ -3,6 +3,7 @@
   "scripts": {
     "containers": "docker-compose -f dev/docker-compose.yml up",
     "containers:down": "docker-compose -f dev/docker-compose.yml down",
+    "containers:clean": "docker rm -f $(docker ps -a -q)",
     "web-app": "cd web-app && npm start",
     "migration:init": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go init\"",
     "migration:up": "docker exec -ti brandless-web-backend sh -c \"go run migrations/*.go up\"",

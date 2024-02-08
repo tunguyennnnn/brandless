@@ -6,14 +6,31 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
+    <style>
+      #item-containers {
+        width: 500px;
+        margin: auto;
+      }
+
+      .fit-parent {
+        width: 100%;
+      }
+    </style>
   </head>
   <body style="margin: 0;">
-    <div id="my-item"></div>
+    <div id="item-containers">
+      <div class="fit-parent">
+        <img class="fit-parent" src="https://assets.adidas.com/images/w_766,h_766,f_auto,q_auto,fl_lossy,c_fill,g_auto/fcb9e8bc25d249579d2dae0b00dbb039_9366/nmd_v3-shoes.jpg" />
+        <div class="glass-product-card__details"><p class="glass-product-card__title" data-auto-id="product-card-title">NMD_V3 Shoes</p><p class="glass-product-card__category" data-auto-id="product-card-category">Originals</p><p class="glass-product-card__label"><span class="dark-grey___6ysQv" data-auto-id="product-card-colvar-count">22 colours</span><span> · </span><span>best seller</span></p></div>
+      </div>
+      <div id="my-item-review" class="fit-parent">
+      </div>
+    </div>
     <script>
       window.addEventListener('load', (event) => {
         console.log('page is fully loaded');
-        Preview.renderReviewer({
-          targetDom: document.getElementById('my-item'),
+        Review.renderReviewer({
+          targetDom: document.getElementById('my-item-review'),
           itemId: '123',
         });
       });
